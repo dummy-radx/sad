@@ -115,6 +115,10 @@ const SunflowerGarden = ({ onJoy }) => {
       <div
         ref={areaRef}
         onClick={plantSeed}
+        onTouchStart={(e) => {
+          const touch = e.touches[0]
+          plantSeed({ clientX: touch.clientX, clientY: touch.clientY })
+        }}
         className="relative overflow-hidden rounded-2xl cursor-pointer"
         style={{
           height: 320,
@@ -128,16 +132,17 @@ const SunflowerGarden = ({ onJoy }) => {
         {plants.map(p => (
           <div
             key={p.id}
-            className="absolute"
+            className="absolute shrink-0"
             style={{ left: p.x - p.size / 2, top: p.y - p.size }}
           >
             <Sunflower size={p.size} />
           </div>
         ))}
       </div>
-      <div className="mt-4 flex gap-2">
-        <button className="btn-cute hand" onClick={() => setPlants([])}>Reset garden</button>
-        <button className="btn-cute hand" onClick={() => {
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button className="btn-cute hand text-sm md:text-base flex-1 md:flex-none" onClick={(e) => { e.stopPropagation(); setPlants([]); }}>Reset garden</button>
+        <button className="btn-cute hand text-sm md:text-base flex-1 md:flex-none" onClick={(e) => {
+          e.stopPropagation()
           const rect = areaRef.current.getBoundingClientRect()
           const x = Math.random() * rect.width
           const y = 80 + Math.random() * (rect.height - 100)

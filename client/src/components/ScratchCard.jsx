@@ -100,8 +100,11 @@ const ScratchCard = ({ onReveal, message }) => {
     }
   }
 
+  const [isAutoScratching, setIsAutoScratching] = useState(false)
+
   const checkReveal = useCallback(() => {
     const canvas = canvasRef.current
+    if (!canvas) return
     const ctx = canvas.getContext('2d')
     const img = ctx.getImageData(0, 0, canvas.width, canvas.height).data
     let cleared = 0
@@ -111,9 +114,38 @@ const ScratchCard = ({ onReveal, message }) => {
     const ratio = cleared / (img.length / 4)
     if (ratio > 0.4 && !revealed) {
       setRevealed(true)
+      setIsAutoScratching(false)
       onReveal?.()
     }
   }, [revealed, onReveal])
+
+  const autoScratch = () => {
+    if (revealed || isAutoScratching) return
+    setIsAutoScratching(true)
+    
+    let frames = 0
+    const animate = () => {
+      if (!canvasRef.current || revealed) return
+      
+      const canvas = canvasRef.current
+      const rect = canvas.getBoundingClientRect()
+      
+      // Generate a few random scratch points per frame
+      for (let i = 0; i < 3; i++) {
+        const x = Math.random() * rect.width
+        const y = Math.random() * rect.height
+        scratch(x, y)
+      }
+      
+      frames++
+      if (frames < 60 && !revealed) {
+        requestAnimationFrame(animate)
+      } else {
+        setIsAutoScratching(false)
+      }
+    }
+    animate()
+  }
 
   return (
     <div className="paper tape p-5 md:p-8 h-full flex flex-col">
@@ -171,9 +203,19 @@ const ScratchCard = ({ onReveal, message }) => {
         )}
       </div>
       
-      {revealed && (
+      {revealed ? (
         <div className="mt-6 hand text-2xl text-center text-[#ff6b9a] animate-bounce">
           Yay! You found it 💛
+        </div>
+      ) : (
+        <div className="mt-4 flex justify-center md:hidden">
+          <button 
+            onClick={autoScratch}
+            disabled={isAutoScratching}
+            className="btn-cute hand text-sm px-6 py-2 flex items-center gap-2"
+          >
+            {isAutoScratching ? "Revealing..." : "✨ Auto Reveal ✨"}
+          </button>
         </div>
       )}
     </div>

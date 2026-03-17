@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 const Heart = ({ x, y, size = 18, fadeMs = 1200 }) => {
   const style = {
@@ -72,8 +72,9 @@ const CloudsGame = ({ onJoy }) => {
   const [clouds, setClouds] = useState([])
   const [hearts, setHearts] = useState([])
   const [notes, setNotes] = useState([])
+  const containerRef = useRef(null)
+  const [area, setArea] = useState({ w: 640, h: 260 })
 
-  const area = useMemo(() => ({ w: 640, h: 260 }), [])
   const msgs = useMemo(() => [
     'You are loved 💛',
     'You are sunshine 🌻',
@@ -106,19 +107,21 @@ const CloudsGame = ({ onJoy }) => {
     'You glow in my sky ✨',
   ], [])
 
-  const createClouds = useCallback((count = 5) => {
+  const createClouds = useCallback((count = 5, currentArea) => {
     const placed = []
     const minDistance = 140
     const relaxedDistance = 110
     const maxAttempts = count * 60
     let attempts = 0
+    const width = currentArea?.w || 640
+    const height = currentArea?.h || 260
 
     while (placed.length < count && attempts < maxAttempts) {
       attempts += 1
       const candidate = {
         id: placed.length + '-' + Math.random().toString(36).slice(2),
-        x: 70 + Math.random() * (area.w - 140),
-        y: 50 + Math.random() * (area.h - 100),
+        x: 70 + Math.random() * (width - 140),
+        y: 50 + Math.random() * (height - 100),
       }
       const overlaps = placed.some(c => Math.hypot(c.x - candidate.x, c.y - candidate.y) < minDistance)
       if (!overlaps) placed.push(candidate)
@@ -129,8 +132,8 @@ const CloudsGame = ({ onJoy }) => {
       attempts += 1
       const candidate = {
         id: placed.length + '-' + Math.random().toString(36).slice(2),
-        x: 70 + Math.random() * (area.w - 140),
-        y: 50 + Math.random() * (area.h - 100),
+        x: 70 + Math.random() * (width - 140),
+        y: 50 + Math.random() * (height - 100),
       }
       const overlaps = placed.some(c => Math.hypot(c.x - candidate.x, c.y - candidate.y) < relaxedDistance)
       if (!overlaps) placed.push(candidate)
@@ -139,17 +142,34 @@ const CloudsGame = ({ onJoy }) => {
     while (placed.length < count) {
       placed.push({
         id: placed.length + '-' + Math.random().toString(36).slice(2),
-        x: 70 + Math.random() * (area.w - 140),
-        y: 50 + Math.random() * (area.h - 100),
+        x: 70 + Math.random() * (width - 140),
+        y: 50 + Math.random() * (height - 100),
       })
     }
 
     return placed
-  }, [area.h, area.w])
+  }, [])
 
   useEffect(() => {
-    setClouds(createClouds(5))
-  }, [createClouds])
+    if (!containerRef.current) return
+    
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        const { width, height } = entry.contentRect
+        setArea({ w: width, h: height })
+      }
+    })
+
+    resizeObserver.observe(containerRef.current)
+    return () => resizeObserver.disconnect()
+  }, [])
+
+  // Initial clouds and refill when area becomes available
+  useEffect(() => {
+    if (area.w > 0 && clouds.length === 0) {
+      setClouds(createClouds(5, area))
+    }
+  }, [area, clouds.length, createClouds])
 
   const popCloud = (id, x, y) => {
     setClouds(prev => prev.filter(c => c.id !== id))
@@ -183,10 +203,11 @@ const CloudsGame = ({ onJoy }) => {
       </div>
       <p className="hand text-lg mb-4">Tap clouds to release hearts and little notes.</p>
       <div
+        ref={containerRef}
         className="relative overflow-hidden rounded-2xl"
         style={{
           width: '100%',
-          height: area.h,
+          height: 260,
           background:
             'linear-gradient(180deg, #dff3ff 0%, #eaf8ff 60%, #eefbff 100%)',
         }}

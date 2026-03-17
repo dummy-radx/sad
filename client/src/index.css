@@ -142,3 +142,11 @@ body {
   opacity: 0;
   animation: float-heart linear infinite;
 }
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

@@ -94,19 +94,21 @@ const LoveCarousel = () => {
         </div>
 
         {/* Navigation Controls */}
-        <div className="absolute inset-x-0 bottom-6 flex items-center justify-center gap-2.5">
-          {messages.map((_, i) => (
-            <button
-              key={i}
-              aria-label={`Go to note ${i + 1}`}
-              onClick={() => goTo(i)}
-              className={`transition-all duration-300 rounded-full ${i === idx ? 'w-6 h-2.5' : 'w-2.5 h-2.5'}`}
-              style={{
-                background: i === idx ? '#ffb6c8' : 'rgba(122, 41, 72, 0.15)',
-                boxShadow: i === idx ? '0 0 8px rgba(255, 182, 200, 0.6)' : 'none'
-              }}
-            />
-          ))}
+        <div className="absolute inset-x-0 bottom-6 flex items-center justify-center pointer-events-none">
+          <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar max-w-[80%] px-4 py-1 pointer-events-auto">
+            {messages.map((_, i) => (
+              <button
+                key={i}
+                aria-label={`Go to note ${i + 1}`}
+                onClick={() => goTo(i)}
+                className={`transition-all duration-300 rounded-full shrink-0 ${i === idx ? 'w-6 h-2.5' : 'w-2.5 h-2.5'}`}
+                style={{
+                  background: i === idx ? '#ffb6c8' : 'rgba(122, 41, 72, 0.15)',
+                  boxShadow: i === idx ? '0 0 8px rgba(255, 182, 200, 0.6)' : 'none'
+                }}
+              />
+            ))}
+          </div>
         </div>
 
         <button
