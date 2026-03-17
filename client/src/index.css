@@ -113,3 +113,32 @@ body {
 .sunflower {
   animation: grow 800ms ease-out forwards;
 }
+
+@keyframes heart-trail {
+  0% { transform: scale(0); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: scale(1.5) translateY(-20px); opacity: 0; }
+}
+
+.heart-particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1000;
+  color: var(--color-heart);
+  animation: heart-trail 0.8s ease-out forwards;
+}
+
+@keyframes float-heart {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+  50% { opacity: 0.6; }
+  100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+}
+
+.bg-heart {
+  position: fixed;
+  pointer-events: none;
+  z-index: -1;
+  color: var(--color-heart);
+  opacity: 0;
+  animation: float-heart linear infinite;
+}
