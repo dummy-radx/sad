@@ -7,6 +7,16 @@ const ScratchCard = ({ onReveal, message }) => {
   const [cursor, setCursor] = useState({ x: 0, y: 0, visible: false })
   const lastPoint = useRef(null)
   const brushRadius = 32
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -54,6 +64,7 @@ const ScratchCard = ({ onReveal, message }) => {
   }, [])
 
   const handleStart = (e) => {
+    if (isMobile) return
     setDrawing(true)
     const rect = canvasRef.current.getBoundingClientRect()
     const x = (e.touches?.[0]?.clientX ?? e.clientX) - rect.left
@@ -88,6 +99,7 @@ const ScratchCard = ({ onReveal, message }) => {
   }
 
   const handleMove = (e) => {
+    if (isMobile) return
     const canvas = canvasRef.current
     const rect = canvas.getBoundingClientRect()
     const x = (e.touches?.[0]?.clientX ?? e.clientX) - rect.left
@@ -183,7 +195,7 @@ const ScratchCard = ({ onReveal, message }) => {
           onTouchMove={handleMove}
         />
 
-        {cursor.visible && !revealed && (
+        {cursor.visible && !revealed && !isMobile && (
           <div
             className="absolute pointer-events-none z-50"
             style={{

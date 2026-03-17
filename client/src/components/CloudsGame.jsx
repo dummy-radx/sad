@@ -73,7 +73,7 @@ const CloudsGame = ({ onJoy }) => {
   const [hearts, setHearts] = useState([])
   const [notes, setNotes] = useState([])
   const containerRef = useRef(null)
-  const [area, setArea] = useState({ w: 640, h: 260 })
+  const [area, setArea] = useState({ w: 0, h: 0 })
 
   const msgs = useMemo(() => [
     'You are loved 💛',
@@ -109,22 +109,31 @@ const CloudsGame = ({ onJoy }) => {
 
   const createClouds = useCallback((count = 5, currentArea) => {
     const placed = []
-    const minDistance = 140
-    const relaxedDistance = 110
+    const width = currentArea?.w || 0
+    const height = currentArea?.h || 0
+    if (width === 0 || height === 0) return []
+
+    const marginX = Math.min(60, width * 0.15)
+    const marginY = Math.min(40, height * 0.15)
+    const playableW = width - (marginX * 2)
+    const playableH = height - (marginY * 2)
+
+    const minDistance = Math.min(140, width * 0.4)
+    const relaxedDistance = Math.min(110, width * 0.3)
     const maxAttempts = count * 60
     let attempts = 0
-    const width = currentArea?.w || 640
-    const height = currentArea?.h || 260
+
+    const isOverlapping = (candidate, list, dist) => 
+      list.some(c => Math.hypot(c.x - candidate.x, c.y - candidate.y) < dist)
 
     while (placed.length < count && attempts < maxAttempts) {
       attempts += 1
       const candidate = {
         id: placed.length + '-' + Math.random().toString(36).slice(2),
-        x: 70 + Math.random() * (width - 140),
-        y: 50 + Math.random() * (height - 100),
+        x: marginX + Math.random() * playableW,
+        y: marginY + Math.random() * playableH,
       }
-      const overlaps = placed.some(c => Math.hypot(c.x - candidate.x, c.y - candidate.y) < minDistance)
-      if (!overlaps) placed.push(candidate)
+      if (!isOverlapping(candidate, placed, minDistance)) placed.push(candidate)
     }
 
     attempts = 0
@@ -132,18 +141,17 @@ const CloudsGame = ({ onJoy }) => {
       attempts += 1
       const candidate = {
         id: placed.length + '-' + Math.random().toString(36).slice(2),
-        x: 70 + Math.random() * (width - 140),
-        y: 50 + Math.random() * (height - 100),
+        x: marginX + Math.random() * playableW,
+        y: marginY + Math.random() * playableH,
       }
-      const overlaps = placed.some(c => Math.hypot(c.x - candidate.x, c.y - candidate.y) < relaxedDistance)
-      if (!overlaps) placed.push(candidate)
+      if (!isOverlapping(candidate, placed, relaxedDistance)) placed.push(candidate)
     }
 
     while (placed.length < count) {
       placed.push({
         id: placed.length + '-' + Math.random().toString(36).slice(2),
-        x: 70 + Math.random() * (width - 140),
-        y: 50 + Math.random() * (height - 100),
+        x: marginX + Math.random() * playableW,
+        y: marginY + Math.random() * playableH,
       })
     }
 
@@ -156,7 +164,9 @@ const CloudsGame = ({ onJoy }) => {
     const resizeObserver = new ResizeObserver((entries) => {
       for (let entry of entries) {
         const { width, height } = entry.contentRect
-        setArea({ w: width, h: height })
+        if (width > 0 && height > 0) {
+          setArea({ w: width, h: height })
+        }
       }
     })
 
@@ -164,12 +174,23 @@ const CloudsGame = ({ onJoy }) => {
     return () => resizeObserver.disconnect()
   }, [])
 
-  // Initial clouds and refill when area becomes available
+  // Initial clouds and refill
   useEffect(() => {
     if (area.w > 0 && clouds.length === 0) {
       setClouds(createClouds(5, area))
     }
-  }, [area, clouds.length, createClouds])
+  }, [area.w, area.h, clouds.length, createClouds])
+
+  // Clamp clouds on resize to keep them visible
+  useEffect(() => {
+    if (area.w > 0 && clouds.length > 0) {
+      setClouds(prev => prev.map(c => ({
+        ...c,
+        x: Math.max(40, Math.min(c.x, area.w - 40)),
+        y: Math.max(30, Math.min(c.y, area.h - 30))
+      })))
+    }
+  }, [area.w, area.h])
 
   const popCloud = (id, x, y) => {
     setClouds(prev => prev.filter(c => c.id !== id))
