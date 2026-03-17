@@ -45,8 +45,12 @@ const ScratchCard = ({ onReveal, message }) => {
     }
 
     initCanvas()
+    const timer = setTimeout(initCanvas, 100) // Double check after a moment
     window.addEventListener('resize', initCanvas)
-    return () => window.removeEventListener('resize', initCanvas)
+    return () => {
+      window.removeEventListener('resize', initCanvas)
+      clearTimeout(timer)
+    }
   }, [])
 
   const handleStart = (e) => {
@@ -112,26 +116,26 @@ const ScratchCard = ({ onReveal, message }) => {
   }, [revealed, onReveal])
 
   return (
-    <div className="paper tape p-5 md:p-8">
+    <div className="paper tape p-5 md:p-8 h-full flex flex-col">
       <div className="flex items-center gap-4 mb-4">
         <div className="w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-inner" style={{ background: 'linear-gradient(135deg, #ffecf3, #ffd7e3)' }}>
           🪄
         </div>
         <h2 className="hand text-3xl md:text-4xl text-[#7a2948]">Scratch to Reveal</h2>
       </div>
-      <p className="hand text-xl mb-6 text-[#4a323a]">Gently scratch to uncover a secret note just for you.</p>
+      <p className="hand text-xl mb-6 text-[#4a323a] min-h-14 md:min-h-12">Gently scratch to uncover a secret note just for you.</p>
       
       <div
         className="relative rounded-3xl overflow-hidden shadow-inner border border-pink-100 group cursor-none"
-        style={{ height: 260, background: '#fffaf1' }}
+        style={{ height: 320, background: '#fffaf1' }}
         onMouseEnter={() => setCursor(c => ({ ...c, visible: true }))}
         onMouseLeave={() => {
           setCursor(c => ({ ...c, visible: false }))
           handleEnd()
         }}
       >
-        <div className="absolute inset-0 flex items-center justify-center p-8">
-          <div className="hand text-2xl md:text-3xl text-center leading-relaxed text-[#7a2948]">
+        <div className="absolute inset-0 flex items-center justify-center p-6 md:p-10 text-center">
+          <div className="hand text-xl md:text-2xl leading-relaxed text-[#7a2948] overflow-hidden">
             {message}
           </div>
         </div>
@@ -149,16 +153,15 @@ const ScratchCard = ({ onReveal, message }) => {
 
         {cursor.visible && !revealed && (
           <div
-            className="absolute pointer-events-none z-50 transition-transform duration-75 ease-out"
+            className="absolute pointer-events-none z-50"
             style={{
               left: cursor.x,
               top: cursor.y,
-              width: brushRadius * 2.5,
-              height: brushRadius * 2.5,
+              width: brushRadius * 2,
+              height: brushRadius * 2,
               transform: 'translate(-50%, -50%)',
               borderRadius: '50%',
               border: '2px solid rgba(255,255,255,0.8)',
-              boxShadow: '0 0 15px rgba(0,0,0,0.1), inset 0 0 10px rgba(255,255,255,0.5)',
               background: 'rgba(255,255,255,0.1)',
               backdropFilter: 'blur(1px)',
             }}

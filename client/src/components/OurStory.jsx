@@ -5,25 +5,43 @@ const OurStory = () => {
     {
       date: "August 2023",
       title: "The Beginning",
-      description: "That first conversation that changed everything.",
+      description: "That first conversation that changed everything and started this beautiful journey.",
       icon: "💬"
     },
     {
       date: "October 2023",
       title: "First Date",
-      description: "Coffee, laughs, and the start of us.",
+      description: "Coffee, laughs, and the moment I knew you were someone extremely special.",
       icon: "☕"
     },
     {
       date: "December 2023",
       title: "First Trip",
-      description: "Exploring new places and finding a home in each other.",
+      description: "Exploring new places and finding a home in each other's presence.",
       icon: "🚗"
+    },
+    {
+      date: "January 2024",
+      title: "New Year's Eve",
+      description: "Starting the year with the person who makes every second count.",
+      icon: "🎆"
+    },
+    {
+      date: "February 2024",
+      title: "Valentine's Day",
+      description: "Celebrating love and the fact that I get to call you mine.",
+      icon: "💝"
+    },
+    {
+      date: "September 2024",
+      title: "First Anniversary",
+      description: "365 days of growth, laughter, and building our own little world.",
+      icon: "💍"
     },
     {
       date: "Today",
       title: "Still Growing",
-      description: "Every day with you is a new favorite chapter.",
+      description: "Every day with you is a new favorite chapter in our never-ending story.",
       icon: "🌻"
     }
   ]
